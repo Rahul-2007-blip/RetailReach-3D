@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RetailReach 3D · AI & Discrete Mathematics Campaign Overlap Lab</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Three.js from CDN with local graceful fallback -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Academic Navigation Bar -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="brand-logo">
+        <span class="logo-icon">RR</span>
+        <div class="logo-text">
+          <span class="logo-title">RetailReach <b>3D</b></span>
+          <span class="logo-sub">Discrete Mathematics & Graph Theory · Module 1</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <div class="academic-badge">
+        <span class="badge-dot"></span>
+        <span>JAIN (Deemed-to-be University) · B.Tech CSE AIML - D</span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button id="downloadPdfBtn" class="btn btn-outline" title="Open and download the formal university project report">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span>Project Report (PDF)</span>
+      </button>
+      <button id="exportCsvBtn" class="btn btn-primary" title="Export mathematical audit to CSV">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Export Audit CSV</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Top KPI Banner -->
+  <section class="kpi-banner">
+    <div class="kpi-card main-kpi">
+      <div class="kpi-header">
+        <span class="kpi-title">DISTINCT AUDIENCE REACH</span>
+        <span class="kpi-tag">Exact Union |⋃ Aᵢ|</span>
+      </div>
+      <div class="kpi-number" id="kpiUniqueReach">1,772</div>
+      <div class="kpi-sub">Unique identified customers (deduplicated)</div>
+      <div class="kpi-bar-wrap">
+        <div class="kpi-bar-fill" id="barUnique" style="width: 72%;"></div>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <span class="kpi-title">DOUBLE-COUNTED OVERLAP</span>
+        <span class="kpi-tag alert">Saved Waste</span>
+      </div>
+      <div class="kpi-number text-lime" id="kpiDuplicates">673</div>
+      <div class="kpi-sub">Duplicate audience records eliminated</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <span class="kpi-title">NAIVE SUM OF LISTS</span>
+        <span class="kpi-tag">Σ |Aᵢ|</span>
+      </div>
+      <div class="kpi-number text-muted-num" id="kpiNaiveSum">2,445</div>
+      <div class="kpi-sub">Gross uncorrected sum of audience sizes</div>
+      <div class="kpi-bar-wrap">
+        <div class="kpi-bar-fill naive" id="barNaive" style="width: 100%;"></div>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <span class="kpi-title">AUDIENCE OVERLAP RATIO</span>
+        <span class="kpi-tag">Inflation %</span>
+      </div>
+      <div class="kpi-number text-cyan" id="kpiOverlapPct">28%</div>
+      <div class="kpi-sub">Fraction of gross list that is redundant</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <span class="kpi-title">ACTIVE PRODUCT SETS</span>
+        <span class="kpi-tag">Order n</span>
+      </div>
+      <div class="kpi-number" id="kpiSetCount">3</div>
+      <div class="kpi-sub">Participating in 2ⁿ − 1 intersections</div>
+    </div>
+  </section>
+
+  <!-- Main Grid Layout -->
+  <div class="app-layout">
+
+    <!-- Left Sidebar: Product & Cohort Builder -->
+    <aside class="sidebar-panel">
+      <div class="panel-box">
+        <div class="panel-box-header">
+          <div>
+            <h3>Campaign Audience Scope</h3>
+            <p>Filter customer cohorts from UCI Retail</p>
+          </div>
+          <button id="resetFiltersBtn" class="btn-text">Reset</button>
+        </div>
+
+        <div class="filter-controls">
+          <div class="form-group">
+            <label>MARKET / COUNTRY</label>
+            <select id="countryFilter" class="form-select">
+              <option value="all">All Global Markets</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>CALENDAR YEAR</label>
+            <select id="yearFilter" class="form-select">
+              <option value="all">Full Period (2010–2011)</option>
+              <option value="2010">2010 Only</option>
+              <option value="2011">2011 Only</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-box flex-grow">
+        <div class="panel-box-header">
+          <div>
+            <h3>Select Products (Sets A–E)</h3>
+            <p>Pick up to 5 products to evaluate</p>
+          </div>
+          <span class="badge-count" id="selectionCount">3 / 5</span>
+        </div>
+
+        <div class="search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="productSearch" placeholder="Filter by product name or stock code...">
+        </div>
+
+        <div class="product-list-scroll" id="productList">
+          <div class="loading-state">Loading dataset...</div>
+        </div>
+
+        <div class="panel-box-footer">
+          <span><span class="dot-indicator"></span> Unique identified customer sets</span>
+          <button id="clearSelectionBtn" class="btn-text">Clear</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Area -->
+    <main class="main-workspace">
+
+      <!-- Navigation Tabs -->
+      <nav class="workspace-tabs">
+        <a href="#3d" class="workspace-tab active" data-target="view-3d">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          <span>3D Spatial Model</span>
+        </a>
+        <a href="#ai" class="workspace-tab" data-target="view-ai">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <span>AI / Deep Learning Lab</span>
+        </a>
+        <a href="#graph" class="workspace-tab" data-target="view-graph">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          <span>Graph Theory & MST</span>
+        </a>
+        <a href="#proof" class="workspace-tab" data-target="view-proof">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
+          <span>Inclusion-Exclusion & Proof</span>
+        </a>
+        <a href="#about" class="workspace-tab" data-target="view-about">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span>Project & Submission Info</span>
+        </a>
+      </nav>
+
+      <!-- TAB 1: 3D SPATIAL MODEL VIEW -->
+      <section id="view-3d" class="tab-view active">
+        <div class="three-toolbar">
+          <div class="three-mode-group">
+            <button class="three-mode-btn active" data-mode="venn">
+              <span class="mode-dot"></span> 3D Volumetric Venn
+            </button>
+            <button class="three-mode-btn" data-mode="particles">
+              <span class="mode-dot"></span> 3D Customer Particle Cloud
+            </button>
+            <button class="three-mode-btn" data-mode="graph">
+              <span class="mode-dot"></span> 3D Product Graph Topology
+            </button>
+          </div>
+          <div class="three-instructions">
+            <span>🖱️ Left-Click + Drag: Rotate | Scroll: Zoom | Right-Click: Pan</span>
+          </div>
+        </div>
+
+        <div class="three-viewport-box">
+          <div id="threeContainer" class="three-canvas-container"></div>
+          <div id="threeTooltip" class="three-tooltip"></div>
+          <div class="three-watermark">RetailReach WebGL Engine · Three.js r128</div>
+        </div>
+
+        <div class="three-legend-bar">
+          <div class="legend-item"><span class="legend-swatch set-a"></span> Set A (Electric Violet)</div>
+          <div class="legend-item"><span class="legend-swatch set-b"></span> Set B (Cyber Cyan)</div>
+          <div class="legend-item"><span class="legend-swatch set-c"></span> Set C (Neon Rose)</div>
+          <div class="legend-item"><span class="legend-swatch set-overlap"></span> Intersections (Acid Lime Glow)</div>
+        </div>
+      </section>
+
+      <!-- TAB 2: AI / DEEP LEARNING VIEW -->
+      <section id="view-ai" class="tab-view hidden">
+        <div class="ai-grid">
+
+          <!-- AI Model Overview Card -->
+          <div class="card-box">
+            <div class="card-box-header">
+              <div>
+                <h3>Audience Overlap Neural Network</h3>
+                <p>Multi-Layer Perceptron trained in-browser on co-purchase topology</p>
+              </div>
+              <span class="status-pill pill-untrained" id="mlModelStatusBadge">INITIALIZED (Random Weights)</span>
+            </div>
+
+            <div class="ai-metrics-row">
+              <div class="ai-stat-box">
+                <span class="ai-stat-label">AI PREDICTED REACH</span>
+                <b class="ai-stat-val text-lime" id="mlPredReach">1,788</b>
+                <small>Distinct customers</small>
+              </div>
+              <div class="ai-stat-box">
+                <span class="ai-stat-label">AI PREDICTED OVERLAP</span>
+                <b class="ai-stat-val text-cyan" id="mlPredOverlap">657</b>
+                <small id="mlPredOverlapPct">27%</small>
+              </div>
+              <div class="ai-stat-box">
+                <span class="ai-stat-label">THEORETICAL EXACT</span>
+                <b class="ai-stat-val text-white" id="mlExactReach">1,772</b>
+                <small>By Inclusion-Exclusion</small>
+              </div>
+              <div class="ai-stat-box">
+                <span class="ai-stat-label">ACCURACY DELTA</span>
+                <b class="ai-stat-val text-rose" id="mlDeltaError">Δ 16 (0.9% err)</b>
+                <small>Generalization gap</small>
+              </div>
+            </div>
+
+            <!-- Neural Net Architecture SVG -->
+            <div class="neural-arch-wrap">
+              <div class="section-sub-title">Neural Network Synaptic Architecture (Forward Pass)</div>
+              <svg id="neuralNetSvg" class="neural-svg" viewBox="0 0 480 180"></svg>
+            </div>
+          </div>
+
+          <!-- Live Training Loss Card -->
+          <div class="card-box">
+            <div class="card-box-header">
+              <div>
+                <h3>Live Gradient Descent Training</h3>
+                <p>Train deep learning weights directly against historical data</p>
+              </div>
+              <button id="trainModelBtn" class="btn btn-sm btn-primary">Re-Train Neural Network</button>
+            </div>
+
+            <div class="loss-canvas-wrap">
+              <canvas id="lossCanvas" class="loss-canvas"></canvas>
+            </div>
+
+            <div class="loss-stats-footer">
+              <span id="mlEpochCounter">Epoch: — / 120</span>
+              <span id="mlLossVal">MSE Loss: —</span>
+              <span>Learning Rate: η = 0.06</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Customer Behavioral Segmentation (K-Means) -->
+        <div class="card-box mt-4">
+          <div class="card-box-header">
+            <div>
+              <h3>AI Customer Behavioral Clustering (K-Means Segmentation)</h3>
+              <p>Unsupervised grouping of 4,338 customer purchase trajectories</p>
+            </div>
+            <span class="kpi-tag">k = 4 Clusters</span>
+          </div>
+
+          <div class="segments-grid" id="customerSegmentsGrid"></div>
+        </div>
+      </section>
+
+      <!-- TAB 3: GRAPH THEORY & MST VIEW -->
+      <section id="view-graph" class="tab-view hidden">
+        <div class="graph-grid">
+
+          <!-- Force / Radial Graph Canvas -->
+          <div class="card-box">
+            <div class="card-box-header">
+              <div>
+                <h3>Co-Purchase Graph Network G = (V, E)</h3>
+                <p>Nodes: 24 products | Edges: Shared customer intersection weight</p>
+              </div>
+              <button id="toggleMstBtn" class="btn btn-sm btn-outline">Show Kruskal MST Only</button>
+            </div>
+
+            <div class="canvas-graph-wrap">
+              <canvas id="graphCanvas" class="graph-canvas"></canvas>
+            </div>
+
+            <div class="graph-legend">
+              <span><span class="legend-dot green"></span> Selected Products</span>
+              <span><span class="legend-dot purple"></span> Other Catalog Products</span>
+              <span><span class="legend-line neon"></span> Kruskal MST Backbone</span>
+              <span><span class="legend-line blue"></span> Co-purchase Edge</span>
+            </div>
+          </div>
+
+          <!-- Adjacency Matrix Heatmap -->
+          <div class="card-box">
+            <div class="card-box-header">
+              <div>
+                <h3>Adjacency Matrix Heatmap</h3>
+                <p>Matrix A[i][j] = |Aᵢ ∩ Aⱼ| pairwise shared customer counts</p>
+              </div>
+            </div>
+
+            <div id="adjMatrixContainer" class="adj-matrix-container"></div>
+          </div>
+
+        </div>
+
+        <!-- Centrality Measures Table -->
+        <div class="card-box mt-4">
+          <div class="card-box-header">
+            <div>
+              <h3>Graph Centrality & Discrete Topology Metrics</h3>
+              <p>Degree Centrality C_D(v), Weighted Degree Σ w_ij, and Local Clustering Coefficients C_i</p>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Product Title</th>
+                  <th>Buyers |Aᵢ|</th>
+                  <th>Degree kᵢ</th>
+                  <th>Weighted Strength</th>
+                  <th>Degree Centrality</th>
+                  <th>Clustering Coeff Cᵢ</th>
+                </tr>
+              </thead>
+              <tbody id="centralityTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: INCLUSION-EXCLUSION & PROOF VIEW -->
+      <section id="view-proof" class="tab-view hidden">
+        <div class="proof-grid">
+
+          <!-- Left Column: Formal Formula & Terms -->
+          <div class="card-box">
+            <div class="card-box-header">
+              <div>
+                <h3>Principle of Inclusion–Exclusion</h3>
+                <p>Mathematical proof verification across 2ⁿ − 1 combinatorial subsets</p>
+              </div>
+              <span id="mathVerifyStatus" class="verify-pill verified">✓ EXACT PROOF VERIFIED</span>
+            </div>
+
+            <div class="formula-banner">
+              <div class="formula-math" id="formulaExpressionStr"></div>
+            </div>
+
+            <div class="section-sub-title mt-3">Combinatorial Term Decomposition (Alternating Signs)</div>
+            <div class="formula-terms-grid" id="formulaTermsContainer"></div>
+
+            <div class="proof-reconciliation">
+              <div class="proof-row">
+                <span>Calculated Inclusion-Exclusion Union:</span>
+                <b class="text-lime" id="formulaResultVal">—</b>
+              </div>
+              <div class="proof-row">
+                <span>Direct Set Union Ground Truth:</span>
+                <b class="text-cyan" id="directResultVal">—</b>
+              </div>
+              <div class="proof-note">
+                Both independent computational methods yield the exact same integer, confirming the theorem holds unconditionally.
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Bonferroni Bounds & Intersection Ledger -->
+          <div class="card-box">
+            <div class="card-box-header">
+              <div>
+                <h3>Bonferroni Inequalities Convergence</h3>
+                <p>Alternating upper and lower bounds bounding the true reach</p>
+              </div>
+            </div>
+
+            <div class="bonferroni-ladder" id="bonferroniContainer"></div>
+
+            <div class="card-box-header mt-4">
+              <div>
+                <h3>Overlap Ledger</h3>
+                <p>Ranking of highest-volume overlapping sub-segments</p>
+              </div>
+            </div>
+
+            <div class="ledger-container" id="intersectionLedger"></div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- TAB 5: ABOUT & ACADEMIC SUBMISSION VIEW -->
+      <section id="view-about" class="tab-view hidden">
+        <div class="card-box">
+          <div class="academic-report-header">
+            <div class="univ-heading">JAIN (Deemed-to-be University)</div>
+            <div class="faculty-heading">Faculty of Engineering and Technology</div>
+            <div class="school-heading">School of Computer Science and Engineering</div>
+            <div class="class-heading">B. Tech CSE AIML - D</div>
+            <div class="course-heading">DISCRETE MATHEMATICS AND GRAPH THEORY (25BSMA10)</div>
+          </div>
+
+          <hr class="divider">
+
+          <div class="submission-meta-grid">
+            <div class="sub-col">
+              <h4>Submitted To:</h4>
+              <div class="mentor-card">
+                <b>Dr. K J Ghanashyam</b>
+                <span>Assistant Professor</span>
+                <span>Department of Data Analytics and Mathematical Sciences</span>
+                <span>Faculty of Engineering & Technology</span>
+                <span>Jain (Deemed-To-Be) University</span>
+              </div>
+            </div>
+
+            <div class="sub-col">
+              <h4>Submitted By (Student Team):</h4>
+              <table class="team-table">
+                <thead>
+                  <tr>
+                    <th>Sl. No</th>
+                    <th>Student Name</th>
+                    <th>USN</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>1</td><td><b>SHREYAS S</b></td><td><code>25BTRCL248</code></td></tr>
+                  <tr><td>2</td><td><b>SIDDHANT RAO</b></td><td><code>25BTRCL251</code></td></tr>
+                  <tr><td>3</td><td><b>SAMPATH PHILIP GEORGE</b></td><td><code>25BTRCL227</code></td></tr>
+                  <tr><td>4</td><td><b>ROKESH VENKATESH</b></td><td><code>25BTRCL213</code></td></tr>
+                  <tr><td>5</td><td><b>RAHUL BISWAS</b></td><td><code>25BTRCL205</code></td></tr>
+                  <tr><td>6</td><td><b>PRAVEEN KUMAR</b></td><td><code>25BTRCL195</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <hr class="divider">
+
+          <div class="dataset-meta-block">
+            <h4>Dataset Attribution & Reproducibility</h4>
+            <p>
+              Source: <b>UCI Machine Learning Repository — Online Retail Dataset</b> (Chen, D., 2015).
+              Consisting of <b>541,909 raw transactions</b> across 4,338 identified customer IDs from 1 Dec 2010 to 9 Dec 2011.
+              Data preprocessing rigorously excluded cancellations, nonpositive prices/quantities, and anonymous visitor sessions.
+            </p>
+            <div class="action-buttons-row">
+              <button class="btn btn-primary" onclick="document.getElementById('downloadPdfBtn').click()">
+                Download Complete Project Report (PDF)
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="three-viz.js"></script>
+  <script src="ml-engine.js"></script>
+  <script src="graph-viz.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
